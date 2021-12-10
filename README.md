@@ -19,7 +19,6 @@ this is a bot for Marhaba defi community  to ask question and vote on the questi
  
  * add a command to get last price of the project token, the change in the last 24 hours, week, or year
  * instead of local json you can use a real database to save all the questions for latter instead of resetting
- * 
  * make the max questions and date for reset configurable
  * add a command to get the 5, 10, 20 most upvoted questions
  * add unit tests to make sure all commands work correctly
