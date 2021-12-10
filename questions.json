@@ -1,37 +1,3 @@
 {
-  "sessions": [
-    {
-      "id": "644570266:644570266",
-      "data": {
-        "questions": [
-          {
-            "number": 3,
-            "question": "where is",
-            "votes": 3
-          },
-          {
-            "number": 1,
-            "question": "how to do ?",
-            "votes": 2
-          },
-          {
-            "number": 2,
-            "question": "when will",
-            "votes": 0
-          },
-          {
-            "number": 4,
-            "question": "how do",
-            "votes": 0
-          },
-          {
-            "number": 5,
-            "question": "when who",
-            "votes": 0
-          }
-        ],
-        "lastDate": 1639415327757
-      }
-    }
-  ]
+  "sessions": []
 }
