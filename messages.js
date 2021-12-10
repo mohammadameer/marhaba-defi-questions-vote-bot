@@ -4,4 +4,6 @@ export default {
   notCommandMessage:
     "to use this bot you can use this commands: \n\n/q or /question to ask a question. \n\n/all or /allquestions to see all the questions of this week. \n\n/upvote or /up to upvote a question. ",
   questionMinMessage: "The question must be at least 5 words long.",
+  noQuestionsMessage:
+    "There are no questions you can add new one by using /q or /question command. then your question",
 };

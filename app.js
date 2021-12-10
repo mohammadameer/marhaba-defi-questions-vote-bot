@@ -66,6 +66,10 @@ bot.command(["all", "allquestions"], async (ctx) => {
 
   const questions = ctx.session.questions.sort((a, b) => b.votes - a.votes);
 
+  if (questions.length === 0) {
+    return ctx.reply(messages.noQuestionsMessage);
+  }
+
   for (let i = 0; i < questions.length; i++) {
     const question = questions[i];
     await ctx.reply(
