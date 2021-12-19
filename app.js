@@ -1,21 +1,13 @@
 import { Telegraf } from "telegraf";
 import express from "express";
-import LocalSession from "telegraf-session-local";
-import cron from "node-cron";
+import database from "./database.js";
 
 import messages from "./messages.js";
-import checkDate from "./utils/checkDate.js";
 
 /* Bot configuration */
 
 const app = express();
 const bot = new Telegraf(process.env.BOT_TOKEN);
-
-bot.use(async (ctx, next) => {
-  await next();
-});
-
-bot.use(new LocalSession({ database: "questions.json" }).middleware());
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening on port ${port}`));
@@ -31,10 +23,10 @@ bot.telegram.getMe().then((botInfo) => {
 bot.command(["start", "help"], (ctx) => ctx.reply(messages.startMessage));
 
 // add new question
-bot.command(["q", "question"], (ctx) => {
-  checkDate(ctx);
+bot.command(["q", "question"], async (ctx) => {
+  const questions = await database.getAllQuestions();
 
-  if (ctx.session.questions.length >= MAX_QUESTIONS) {
+  if (questions.length >= MAX_QUESTIONS) {
     return ctx.reply(messages.questionsMax);
   }
 
@@ -49,12 +41,11 @@ bot.command(["q", "question"], (ctx) => {
   }
 
   if (question) {
-    ctx.session.questions = ctx.session.questions || [];
-    ctx.session.questions.push({
-      number: ctx.session.questions.length + 1,
-      question,
-      votes: 0,
-    });
+    const number = questions.length + 1;
+
+    console.log(questions);
+
+    await database.newQuestion({ number, question });
 
     ctx.reply("thanks your question has been added");
   }
@@ -62,9 +53,9 @@ bot.command(["q", "question"], (ctx) => {
 
 // get all questions
 bot.command(["all", "allquestions"], async (ctx) => {
-  checkDate(ctx);
+  const questions = await database.getAllQuestions();
 
-  const questions = ctx.session.questions.sort((a, b) => b.votes - a.votes);
+  console.log(questions);
 
   if (questions.length === 0) {
     return ctx.reply(messages.noQuestionsMessage);
@@ -79,21 +70,13 @@ bot.command(["all", "allquestions"], async (ctx) => {
 });
 
 // vote for a question
-bot.command(["up", "upvote"], (ctx) => {
-  checkDate(ctx);
-
+bot.command(["up", "upvote"], async (ctx) => {
   const number = parseInt(ctx.message.text.split(" ")[1]);
-  let found = false;
 
   if (number) {
-    ctx.session.questions.forEach((question) => {
-      if (question.number === number) {
-        question.votes++;
-        found = true;
-      }
-    });
+    const question = await database.updateQuestion({ number });
 
-    if (found) {
+    if (question?.modifiedCount > 0) {
       ctx.reply("Thanks for your vote");
     } else {
       ctx.reply(
