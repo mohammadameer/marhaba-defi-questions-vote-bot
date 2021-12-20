@@ -27,7 +27,7 @@ let insert = function (data, collectionName = questionsCollection) {
     }
   });
 };
-var update = function (query, data, collectionName = questionsCollection) {
+let update = function (query, data, collectionName = questionsCollection) {
   return new Promise((resolve, reject) => {
     try {
       mongoClient.connect(uri, (err, client) => {
@@ -55,7 +55,8 @@ var update = function (query, data, collectionName = questionsCollection) {
     }
   });
 };
-var remove = function (query, collectionName = questionsCollection) {
+
+let remove = function (query, collectionName = questionsCollection) {
   return new Promise((resolve, reject) => {
     try {
       mongoClient.connect(uri, (err, client) => {
@@ -113,8 +114,13 @@ let newQuestion = async ({ number, question }) => {
   await insert({ number, question, votes: 0 });
 };
 
-let updateQuestion = async ({ number }) => {
-  const question = await update({ number }, { $inc: { votes: 1 } });
+let deleteQuestion = async ({ number }) => {
+  const res = await remove({ number });
+  return res;
+};
+
+let updateQuestion = async ({ number, data }) => {
+  const question = await update({ number }, data);
   return question;
 };
 
@@ -126,6 +132,7 @@ let getAllQuestions = async () => {
 
 export default {
   newQuestion,
+  deleteQuestion,
   updateQuestion,
   getAllQuestions,
 };

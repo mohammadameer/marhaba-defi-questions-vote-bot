@@ -43,19 +43,58 @@ bot.command(["q", "question"], async (ctx) => {
   if (question) {
     const number = questions.length + 1;
 
-    console.log(questions);
-
     await database.newQuestion({ number, question });
 
     ctx.reply("thanks your question has been added");
   }
 });
 
+// add new question
+bot.command(["d", "delete"], async (ctx) => {
+  const number = parseInt(ctx.message.text.split(" ")[1]);
+
+  if (number) {
+    const res = await database.deleteQuestion({ number });
+
+    if (res.deletedCount) {
+      ctx.reply("the question has been deleted");
+    } else {
+      ctx.reply("no question found with number " + number);
+    }
+  } else {
+    ctx.reply("please enter a number");
+  }
+});
+
+// add new question
+bot.command(["a", "answer"], async (ctx) => {
+  const text = ctx.message.text.split(" ");
+
+  text.shift();
+
+  const number = parseInt(text.shift());
+
+  const answer = text.join(" ");
+
+  if (number) {
+    const res = await database.updateQuestion({
+      number,
+      data: { $set: { answer } },
+    });
+
+    if (res.modifiedCount > 0) {
+      ctx.reply("question has been updated with answer");
+    } else {
+      ctx.reply("no question found with number " + number);
+    }
+  } else {
+    ctx.reply("please enter a number");
+  }
+});
+
 // get all questions
 bot.command(["all", "allquestions"], async (ctx) => {
   const questions = await database.getAllQuestions();
-
-  console.log(questions);
 
   if (questions.length === 0) {
     return ctx.reply(messages.noQuestionsMessage);
@@ -64,7 +103,9 @@ bot.command(["all", "allquestions"], async (ctx) => {
   for (let i = 0; i < questions.length; i++) {
     const question = questions[i];
     await ctx.reply(
-      `#${question.number}. ${question.question} \nvotes:(${question.votes})`
+      `#${question.number}. ${question.question} \nvotes:(${question.votes}) ${
+        question.answer ? "\nanswer: " + question.answer : ""
+      }`
     );
   }
 });
@@ -74,7 +115,10 @@ bot.command(["up", "upvote"], async (ctx) => {
   const number = parseInt(ctx.message.text.split(" ")[1]);
 
   if (number) {
-    const question = await database.updateQuestion({ number });
+    const question = await database.updateQuestion({
+      number,
+      data: { $inc: { votes: 1 } },
+    });
 
     if (question?.modifiedCount > 0) {
       ctx.reply("Thanks for your vote");
