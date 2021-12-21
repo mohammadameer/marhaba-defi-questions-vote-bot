@@ -124,6 +124,12 @@ let updateQuestion = async ({ number, data }) => {
   return question;
 };
 
+let getQuestion = async ({ number }) => {
+  let question = await query({ number });
+
+  return question ? question[0] : null;
+};
+
 let getAllQuestions = async () => {
   let questions = await query();
 
@@ -134,5 +140,6 @@ export default {
   newQuestion,
   deleteQuestion,
   updateQuestion,
+  getQuestion,
   getAllQuestions,
 };
