@@ -2,7 +2,7 @@ import { Telegraf } from "telegraf";
 import database from "./database.js";
 import messages from "./messages.js";
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
+const bot = new Telegraf("5050130701:AAEKOp5s-1J-f0uvGRwCNHA3usJ82dR0dyc");
 
 const MAX_QUESTIONS = 50;
 
