@@ -19,7 +19,7 @@ bot.command(["g"], async (ctx) => {
   const number = parseInt(ctx.message.text.split(" ")[1]);
 
   if (number) {
-    const question = await database.getQuestion({ number });
+    const question = await database.getQuestion({ hide: false, number });
 
     if (question) {
       ctx.reply(
@@ -37,7 +37,7 @@ bot.command(["g"], async (ctx) => {
 
 // add new question
 bot.command(["q"], async (ctx) => {
-  const questions = await database.getAllQuestions();
+  const questions = await database.getAllQuestions({ hide: false });
 
   if (questions.length >= MAX_QUESTIONS) {
     return ctx.reply(messages.questionsMax);
@@ -61,6 +61,7 @@ bot.command(["q"], async (ctx) => {
       question,
       votes: 0,
       answer: "",
+      answered: false,
       hide: false,
       saved: false,
     });
@@ -99,7 +100,7 @@ bot.command(["a"], async (ctx) => {
   if (number) {
     const res = await database.updateQuestion({
       number,
-      data: { $set: { answer } },
+      data: { $set: { answer, answered: true } },
     });
 
     console.log(res);
@@ -116,7 +117,7 @@ bot.command(["a"], async (ctx) => {
 
 // get all questions
 bot.command(["all"], async (ctx) => {
-  const questions = await database.getAllQuestions();
+  const questions = await database.getAllQuestions({ hide: false });
 
   if (questions.length === 0) {
     return ctx.reply(messages.noQuestionsMessage);
@@ -155,7 +156,14 @@ bot.command(["up"], async (ctx) => {
 });
 
 bot.on("inline_query", async (ctx) => {
-  const questions = await database.getAllQuestions();
+  const query = ctx.inlineQuery.query;
+  console.log(query);
+  const questions = await database.getAllQuestions({
+    hide: false,
+    $text: { $search: query },
+  });
+
+  console.log("questions", questions);
 
   const results =
     questions?.length > 0

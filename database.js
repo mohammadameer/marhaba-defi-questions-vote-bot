@@ -109,9 +109,9 @@ var query = function (query = {}, collectionName = questionsCollection) {
   });
 };
 
-let newQuestion = async ({ number, question }) => {
+let newQuestion = async (data) => {
   // Insert question to 'questions' collection
-  await insert({ number, question, votes: 0 });
+  await insert(data);
 };
 
 let deleteQuestion = async ({ number }) => {
@@ -124,14 +124,14 @@ let updateQuestion = async ({ number, data }) => {
   return question;
 };
 
-let getQuestion = async ({ number }) => {
-  let question = await query({ number });
+let getQuestion = async (queryData) => {
+  let question = await query(queryData);
 
   return question ? question[0] : null;
 };
 
-let getAllQuestions = async () => {
-  let questions = await query();
+let getAllQuestions = async (queryData) => {
+  let questions = await query(queryData);
 
   return questions;
 };
