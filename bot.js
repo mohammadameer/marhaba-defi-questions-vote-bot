@@ -215,7 +215,7 @@ bot.on("inline_query", async (ctx) => {
   }
 });
 
-bot.on("text", (ctx) => ctx.reply(messages.notCommandMessage));
+// bot.on("text", (ctx) => ctx.reply(messages.notCommandMessage));
 
 bot.launch();
 
