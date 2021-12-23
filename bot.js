@@ -6,6 +6,28 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const MAX_QUESTIONS = 50;
 
+bot.use(function (ctx, next) {
+  /// or other chat types...
+  // if( ctx.chat.type !== 'channel' ) return next();
+  if (ctx.chat.id > 0) return next();
+
+  /// need to cache this result ( variable or session or ....)
+  /// because u don't need to call this method
+  /// every message
+  return bot.telegram
+    .getChatAdministrators(ctx.chat.id)
+    .then(function (data) {
+      if (!data || !data.length) return;
+      console.log("admin list:", data);
+      ctx.chat._admins = data;
+      ctx.from._is_in_admin_list = data.some(
+        (adm) => adm.user.id === ctx.from.id
+      );
+    })
+    .catch(console.log)
+    .then((_) => next(ctx));
+});
+
 /* Bot commands */
 bot.telegram.getMe().then((botInfo) => {
   bot.options.username = botInfo.username;
@@ -37,7 +59,7 @@ bot.command(["g"], async (ctx) => {
 
 // add new question
 bot.command(["q"], async (ctx) => {
-  const questions = await database.getAllQuestions({ hide: false });
+  const questions = await database.getAllQuestions();
 
   if (questions.length >= MAX_QUESTIONS) {
     return ctx.reply(messages.questionsMax);
@@ -72,18 +94,21 @@ bot.command(["q"], async (ctx) => {
 
 // add new question
 bot.command(["d"], async (ctx) => {
-  const number = parseInt(ctx.message.text.split(" ")[1]);
+  if (ctx.from._is_in_admin_list) {
+    const number = parseInt(ctx.message.text.split(" ")[1]);
+    if (number) {
+      const res = await database.deleteQuestion({ number });
 
-  if (number) {
-    const res = await database.deleteQuestion({ number });
-
-    if (res.deletedCount) {
-      ctx.reply("the question has been deleted");
+      if (res.deletedCount) {
+        ctx.reply("the question has been deleted");
+      } else {
+        ctx.reply("no question found with number " + number);
+      }
     } else {
-      ctx.reply("no question found with number " + number);
+      ctx.reply("please enter a number");
     }
   } else {
-    ctx.reply("please enter a number");
+    return ctx.reply("only admins can delete questions");
   }
 });
 
@@ -117,20 +142,24 @@ bot.command(["a"], async (ctx) => {
 
 // get all questions
 bot.command(["all"], async (ctx) => {
-  const questions = await database.getAllQuestions({ hide: false });
+  // const questions = await database.getAllQuestions({ hide: false });
 
-  if (questions.length === 0) {
-    return ctx.reply(messages.noQuestionsMessage);
-  }
+  // if (questions.length === 0) {
+  //   return ctx.reply(messages.noQuestionsMessage);
+  // }
 
-  for (let i = 0; i < questions.length; i++) {
-    const question = questions[i];
-    await ctx.reply(
-      `#${question.number}. ${question.question} \nvotes:(${question.votes}) ${
-        question.answer ? "\nanswer: " + question.answer : ""
-      }`
-    );
-  }
+  // for (let i = 0; i < questions.length; i++) {
+  //   const question = questions[i];
+  //   await ctx.reply(
+  //     `#${question.number}. ${question.question} \nvotes:(${question.votes}) ${
+  //       question.answer ? "\nanswer: " + question.answer : ""
+  //     }`
+  //   );
+  // }
+
+  ctx.reply(
+    "you can search for questions by mentioning the bot @mrhbqabot {your question} if no related questions you can ask a new question by usign /q {your question}"
+  );
 });
 
 // vote for a question
@@ -157,32 +186,33 @@ bot.command(["up"], async (ctx) => {
 
 bot.on("inline_query", async (ctx) => {
   const query = ctx.inlineQuery.query;
-  console.log(query);
-  const questions = await database.getAllQuestions({
-    hide: false,
-    $text: { $search: query },
-  });
+  if (query) {
+    const questions = await database.getAllQuestions({
+      hide: false,
+      $text: { $search: query },
+    });
 
-  console.log("questions", questions);
+    const results =
+      questions?.length > 0
+        ? questions.map((question) => ({
+            type: "article",
+            id: question.number,
+            title: question.question,
+            description: `question number: ${question.number}, answered: ${
+              question.answer ? "Yes" : "No"
+            }`,
+            hide_url: true,
+            thumb_url: "https://j.top4top.io/p_21810q4qo1.jpg",
+            input_message_content: {
+              message_text: "/g " + question.number,
+            },
+          }))
+        : [];
 
-  const results =
-    questions?.length > 0
-      ? questions.map((question) => ({
-          type: "article",
-          id: question.number,
-          title: question.question,
-          description: `question number: ${question.number}, answered: ${
-            question.answer ? "Yes" : "No"
-          }`,
-          hide_url: true,
-          thumb_url: "https://j.top4top.io/p_21810q4qo1.jpg",
-          input_message_content: {
-            message_text: "/g " + question.number,
-          },
-        }))
-      : [];
-
-  ctx.answerInlineQuery(results);
+    ctx.answerInlineQuery(results);
+  } else {
+    ctx.answerInlineQuery([]);
+  }
 });
 
 bot.on("text", (ctx) => ctx.reply(messages.notCommandMessage));
