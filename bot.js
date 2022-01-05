@@ -9,7 +9,7 @@ const MAX_QUESTIONS = 50;
 bot.use(function (ctx, next) {
   /// or other chat types...
   // if( ctx.chat.type !== 'channel' ) return next();
-  if (ctx.chat.id > 0) return next();
+  if (ctx?.chat?.id && ctx.chat.id > 0) return next();
 
   /// need to cache this result ( variable or session or ....)
   /// because u don't need to call this method
