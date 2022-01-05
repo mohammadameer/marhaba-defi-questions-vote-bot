@@ -7,7 +7,7 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 const MAX_QUESTIONS = 50;
 
 bot.use(function (ctx, next) {
-  if (ctx?.chat?.id && ctx.chat.id > 0) return next();
+  if (!ctx?.chat?.id || ctx.chat.id > 0) return next();
 
   return bot.telegram
     .getChatAdministrators(ctx.chat.id)
