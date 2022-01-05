@@ -180,33 +180,37 @@ bot.command(["up"], async (ctx) => {
 });
 
 bot.on("inline_query", async (ctx) => {
-  const query = ctx.inlineQuery.query;
-  if (query) {
-    const questions = await database.getAllQuestions({
-      hide: false,
-      $text: { $search: query },
-    });
+  try {
+    const query = ctx.inlineQuery.query;
+    if (query) {
+      const questions = await database.getAllQuestions({
+        hide: false,
+        $text: { $search: query },
+      });
 
-    const results =
-      questions?.length > 0
-        ? questions.map((question) => ({
-            type: "article",
-            id: question.number,
-            title: question.question,
-            description: `question number: ${question.number}, answered: ${
-              question.answer ? "Yes" : "No"
-            }`,
-            hide_url: true,
-            thumb_url: "https://j.top4top.io/p_21810q4qo1.jpg",
-            input_message_content: {
-              message_text: "/g " + question.number,
-            },
-          }))
-        : [];
+      const results =
+        questions?.length > 0
+          ? questions.map((question) => ({
+              type: "article",
+              id: question.number,
+              title: question.question,
+              description: `question number: ${question.number}, answered: ${
+                question.answer ? "Yes" : "No"
+              }`,
+              hide_url: true,
+              thumb_url: "https://j.top4top.io/p_21810q4qo1.jpg",
+              input_message_content: {
+                message_text: "/g " + question.number,
+              },
+            }))
+          : [];
 
-    ctx.answerInlineQuery(results);
-  } else {
-    ctx.answerInlineQuery([]);
+      ctx.answerInlineQuery(results);
+    } else {
+      ctx.answerInlineQuery([]);
+    }
+  } catch (e) {
+    console.log(e);
   }
 });
 
