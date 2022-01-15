@@ -13,7 +13,6 @@ bot.use(function (ctx, next) {
     .getChatAdministrators(ctx.chat.id)
     .then(function (data) {
       if (!data || !data.length) return;
-      console.log("admin list:", data);
       ctx.chat._admins = data;
       ctx.from._is_in_admin_list = data.some(
         (adm) => adm.user.id === ctx.from.id
@@ -137,24 +136,34 @@ bot.command(["a"], async (ctx) => {
 
 // get all questions
 bot.command(["all"], async (ctx) => {
-  // const questions = await database.getAllQuestions({ hide: false });
 
-  // if (questions.length === 0) {
-  //   return ctx.reply(messages.noQuestionsMessage);
-  // }
+  console.log(ctx.chat.type)
+  
 
-  // for (let i = 0; i < questions.length; i++) {
-  //   const question = questions[i];
-  //   await ctx.reply(
-  //     `#${question.number}. ${question.question} \nvotes:(${question.votes}) ${
-  //       question.answer ? "\nanswer: " + question.answer : ""
-  //     }`
-  //   );
-  // }
+  if (ctx.chat.type == "private" || ctx.from._is_in_admin_list) {
+    const questions = await database.getAllQuestions({ hide: false, answered: false, });
 
-  ctx.reply(
-    "you can search for questions by mentioning the bot @mrhbqabot {your question} if no related questions you can ask a new question by usign /q {your question}"
-  );
+    if (questions.length === 0) {
+      return ctx.reply(messages.noQuestionsMessage);
+    }
+
+    for (let i = 0; i < questions.length; i++) {
+      const question = questions[i];
+      await ctx.reply(
+        `#${question.number}. ${question.question} \nvotes:(${question.votes}) ${
+          question.answer ? "\nanswer: " + question.answer : ""
+        }`
+      );
+    }
+  } else {
+  
+    ctx.reply(
+      "to see all questions use the /all command in the bot private chat @mrhbqabot"
+    );
+  }
+
+
+
 });
 
 // vote for a question
