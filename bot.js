@@ -146,15 +146,18 @@ bot.command(["all"], async (ctx) => {
     if (questions.length === 0) {
       return ctx.reply(messages.noQuestionsMessage);
     }
+    let message = "all unaswered questions:\n";
 
     for (let i = 0; i < questions.length; i++) {
-      const question = questions[i];
-      await ctx.reply(
-        `#${question.number}. ${question.question} \nvotes:(${question.votes}) ${
+      let question = questions[i];
+      
+    message +=    `\n\n #${question.number}. ${question.question} \nvotes:(${question.votes}) ${
           question.answer ? "\nanswer: " + question.answer : ""
         }`
-      );
+      
     }
+
+    ctx.reply(message);
   } else {
   
     ctx.reply(
