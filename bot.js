@@ -1,4 +1,5 @@
 import { Telegraf } from "telegraf";
+import LocalSession from "telegraf-session-local";
 import database from "./database.js";
 import messages from "./messages.js";
 
@@ -6,6 +7,7 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const MAX_QUESTIONS = 50;
 
+bot.use(new LocalSession({ database: "users.json" }).middleware());
 bot.use(function (ctx, next) {
   if (!ctx?.chat?.id || ctx.chat.id > 0) return next();
 
@@ -122,8 +124,6 @@ bot.command(["a"], async (ctx) => {
       data: { $set: { answer, answered: true } },
     });
 
-    console.log(res);
-
     if (res.modifiedCount > 0) {
       ctx.reply("question has been updated with answer");
     } else {
@@ -136,12 +136,13 @@ bot.command(["a"], async (ctx) => {
 
 // get all questions
 bot.command(["all"], async (ctx) => {
-
-  console.log(ctx.chat.type)
-  
-
   if (ctx.chat.type == "private" || ctx.from._is_in_admin_list) {
-    const questions = await database.getAllQuestions({ hide: false, answered: false, });
+    ctx.reply("getting all questions...");
+
+    const questions = await database.getAllQuestions({
+      hide: false,
+      answered: false,
+    });
 
     if (questions.length === 0) {
       return ctx.reply(messages.noQuestionsMessage);
@@ -150,23 +151,18 @@ bot.command(["all"], async (ctx) => {
 
     for (let i = 0; i < questions.length; i++) {
       let question = questions[i];
-      
-    message +=    `\n\n #${question.number}. ${question.question} \nvotes:(${question.votes}) ${
-          question.answer ? "\nanswer: " + question.answer : ""
-        }`
-      
+
+      message += `\n\n #${question.number}. ${question.question} \nvotes:(${
+        question.votes
+      }) ${question.answer ? "\nanswer: " + question.answer : ""}`;
     }
 
     ctx.reply(message);
   } else {
-  
     ctx.reply(
       "to see all questions use the /all command in the bot private chat @mrhbqabot"
     );
   }
-
-
-
 });
 
 // vote for a question
@@ -174,17 +170,24 @@ bot.command(["up"], async (ctx) => {
   const number = parseInt(ctx.message.text.split(" ")[1]);
 
   if (number) {
-    const question = await database.updateQuestion({
-      number,
-      data: { $inc: { votes: 1 } },
-    });
+    ctx.session.votes = ctx.session?.votes || { [ctx.from.id]: {} };
 
-    if (question?.modifiedCount > 0) {
-      ctx.reply("Thanks for your vote");
+    if (ctx.session.votes[ctx.from.id][number]) {
+      return ctx.reply("you already voted for this question");
     } else {
-      ctx.reply(
-        "Question not found you can see all questions with /all or /allquestions"
-      );
+      const question = await database.updateQuestion({
+        number,
+        data: { $inc: { votes: 1 } },
+      });
+
+      if (question?.modifiedCount > 0) {
+        ctx.session.votes[ctx.from.id][number] = true;
+        ctx.reply("Thanks for your vote");
+      } else {
+        ctx.reply(
+          "Question not found you can see all questions with /all or /allquestions"
+        );
+      }
     }
   } else {
     ctx.reply("Please enter a valid question number");
