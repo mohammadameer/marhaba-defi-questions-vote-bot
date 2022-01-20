@@ -172,7 +172,10 @@ bot.command(["up"], async (ctx) => {
   if (number) {
     ctx.session.votes = ctx.session?.votes || { [ctx.from.id]: {} };
 
-    if (ctx.session.votes[ctx.from.id][number]) {
+    if (
+      ctx.session.votes[ctx.from.id] &&
+      ctx.session.votes[ctx.from.id][number]
+    ) {
       return ctx.reply("you already voted for this question");
     } else {
       const question = await database.updateQuestion({
