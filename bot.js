@@ -5,8 +5,6 @@ import messages from "./messages.js";
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-const MAX_QUESTIONS = 50;
-
 bot.use(new LocalSession({ database: "users.json" }).middleware());
 bot.use(function (ctx, next) {
   if (!ctx?.chat?.id || ctx.chat.id > 0) return next();
@@ -57,10 +55,6 @@ bot.command(["g"], async (ctx) => {
 bot.command(["q"], async (ctx) => {
   const questions = await database.getAllQuestions();
 
-  if (questions.length >= MAX_QUESTIONS) {
-    return ctx.reply(messages.questionsMax);
-  }
-
   const text = ctx.message.text.split(" ");
 
   text.shift();
@@ -72,7 +66,8 @@ bot.command(["q"], async (ctx) => {
   }
 
   if (question) {
-    const number = questions.length + 1;
+    const val = Math.floor(1000 + Math.random() * 9000);
+    const number = val + questions.length + 1;
 
     await database.newQuestion({
       number,
