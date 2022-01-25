@@ -136,6 +136,35 @@ bot.command(["all"], async (ctx) => {
 
     const questions = await database.getAllQuestions({
       hide: false,
+    });
+
+    if (questions.length === 0) {
+      return ctx.reply(messages.noQuestionsMessage);
+    }
+    let message = "all questions:\n";
+
+    for (let i = 0; i < questions.length; i++) {
+      let question = questions[i];
+
+      message += `\n\n #${question.number}. ${question.question} \nvotes:(${
+        question.votes
+      }) ${question.answer ? "\nanswer: " + question.answer : ""}`;
+    }
+
+    ctx.reply(message);
+  } else {
+    ctx.reply(
+      "to see all questions use the /all command in the bot private chat @mrhbqabot also you can use /allAnswered to get the answered questions and /allNotAnswered to get all notanswered questions"
+    );
+  }
+});
+
+bot.command(["allNotAnswered"], async (ctx) => {
+  if (ctx.chat.type == "private" || ctx.from._is_in_admin_list) {
+    ctx.reply("getting all questions...");
+
+    const questions = await database.getAllQuestions({
+      hide: false,
       answered: false,
     });
 
@@ -155,7 +184,37 @@ bot.command(["all"], async (ctx) => {
     ctx.reply(message);
   } else {
     ctx.reply(
-      "to see all questions use the /all command in the bot private chat @mrhbqabot"
+      "to see all questions use the /all command in the bot private chat @mrhbqabot also you can use /allAnswered to get the answered questions and /allNotAnswered to get all not answered questions"
+    );
+  }
+});
+
+bot.command(["allAnswered"], async (ctx) => {
+  if (ctx.chat.type == "private" || ctx.from._is_in_admin_list) {
+    ctx.reply("getting all questions...");
+
+    const questions = await database.getAllQuestions({
+      hide: false,
+      answered: true,
+    });
+
+    if (questions.length === 0) {
+      return ctx.reply(messages.noQuestionsMessage);
+    }
+    let message = "all aswered questions:\n";
+
+    for (let i = 0; i < questions.length; i++) {
+      let question = questions[i];
+
+      message += `\n\n #${question.number}. ${question.question} \nvotes:(${
+        question.votes
+      }) ${question.answer ? "\nanswer: " + question.answer : ""}`;
+    }
+
+    ctx.reply(message);
+  } else {
+    ctx.reply(
+      "to see all questions use the /all command in the bot private chat @mrhbqabot also you can use /allAnswered to get the answered questions and /allNotAnswered to get all notanswered questions"
     );
   }
 });
