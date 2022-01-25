@@ -172,7 +172,7 @@ bot.command(["all"], async (ctx) => {
 
 bot.command(["allnotanswered"], async (ctx) => {
   if (ctx.chat.type == "private" || ctx.from._is_in_admin_list) {
-    ctx.reply("getting all answered questions...");
+    ctx.reply("getting all not answered questions...");
 
     const questions = await database.getAllQuestions({
       hide: false,
@@ -209,7 +209,7 @@ bot.command(["allnotanswered"], async (ctx) => {
 
 bot.command(["allanswered"], async (ctx) => {
   if (ctx.chat.type == "private" || ctx.from._is_in_admin_list) {
-    ctx.reply("getting all not answered questions...");
+    ctx.reply("getting all answered questions...");
 
     const questions = await database.getAllQuestions({
       hide: false,
