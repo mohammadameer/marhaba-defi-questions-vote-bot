@@ -41,7 +41,11 @@ bot.command(["g"], async (ctx) => {
       ctx.reply(
         `#${question.number}. ${question.question} \nvotes:(${
           question.votes
-        }) ${question.answer ? "\nanswer: " + question.answer : ""}`
+        }) ${
+          question.answer
+            ? "\nanswer: " + question.answer
+            : "\nnot answered yet"
+        }`
       );
     } else {
       ctx.reply("no question found with number " + number);
@@ -148,7 +152,14 @@ bot.command(["all"], async (ctx) => {
 
       message += `\n\n #${question.number}. ${question.question} \nvotes:(${
         question.votes
-      }) ${question.answer ? "\nanswer: " + question.answer : ""}`;
+      }) ${
+        question.answer ? "\nanswer: " + question.answer : "\nnot answered yet"
+      }`;
+
+      if (message.length > 4090) {
+        ctx.reply(message.slice(0, 4090));
+        message = message.slice(4090);
+      }
     }
 
     ctx.reply(message);
@@ -161,7 +172,7 @@ bot.command(["all"], async (ctx) => {
 
 bot.command(["allnotanswered"], async (ctx) => {
   if (ctx.chat.type == "private" || ctx.from._is_in_admin_list) {
-    ctx.reply("getting all questions...");
+    ctx.reply("getting all answered questions...");
 
     const questions = await database.getAllQuestions({
       hide: false,
@@ -178,7 +189,14 @@ bot.command(["allnotanswered"], async (ctx) => {
 
       message += `\n\n #${question.number}. ${question.question} \nvotes:(${
         question.votes
-      }) ${question.answer ? "\nanswer: " + question.answer : ""}`;
+      }) ${
+        question.answer ? "\nanswer: " + question.answer : "\nnot answered yet"
+      }`;
+
+      if (message.length > 4090) {
+        ctx.reply(message.slice(0, 4090));
+        message = message.slice(4090);
+      }
     }
 
     ctx.reply(message);
@@ -191,7 +209,7 @@ bot.command(["allnotanswered"], async (ctx) => {
 
 bot.command(["allanswered"], async (ctx) => {
   if (ctx.chat.type == "private" || ctx.from._is_in_admin_list) {
-    ctx.reply("getting all questions...");
+    ctx.reply("getting all not answered questions...");
 
     const questions = await database.getAllQuestions({
       hide: false,
@@ -208,7 +226,14 @@ bot.command(["allanswered"], async (ctx) => {
 
       message += `\n\n #${question.number}. ${question.question} \nvotes:(${
         question.votes
-      }) ${question.answer ? "\nanswer: " + question.answer : ""}`;
+      }) ${
+        question.answer ? "\nanswer: " + question.answer : "\nnot answered yet"
+      }`;
+
+      if (message.length > 4090) {
+        ctx.reply(message.slice(0, 4090));
+        message = message.slice(4090);
+      }
     }
 
     ctx.reply(message);
