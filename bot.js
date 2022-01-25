@@ -159,7 +159,7 @@ bot.command(["all"], async (ctx) => {
   }
 });
 
-bot.command(["allNotAnswered"], async (ctx) => {
+bot.command(["allnotanswered"], async (ctx) => {
   if (ctx.chat.type == "private" || ctx.from._is_in_admin_list) {
     ctx.reply("getting all questions...");
 
@@ -189,7 +189,7 @@ bot.command(["allNotAnswered"], async (ctx) => {
   }
 });
 
-bot.command(["allAnswered"], async (ctx) => {
+bot.command(["allanswered"], async (ctx) => {
   if (ctx.chat.type == "private" || ctx.from._is_in_admin_list) {
     ctx.reply("getting all questions...");
 
