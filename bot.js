@@ -2,8 +2,11 @@ import { Telegraf } from "telegraf";
 import LocalSession from "telegraf-session-local";
 import database from "./database.js";
 import messages from "./messages.js";
+import AnyCase from "telegraf-anycase-commands";
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
+
+bot.use(AnyCase.lowercase());
 
 bot.use(new LocalSession({ database: "users.json" }).middleware());
 bot.use(function (ctx, next) {
